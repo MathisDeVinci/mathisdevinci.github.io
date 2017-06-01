@@ -1,0 +1,55 @@
+body
+{
+	background : url(fond_generation.png);
+	background-size: cover;
+}
+
+a[href="accueil.html"]
+{
+	font-size:30px;
+	margin-left: 540px;
+}
+
+a[href="conception.html"]
+{
+	font-size:30px;
+	margin-left: 30px;
+}
+
+a[href="opensource.html"]
+{
+	font-size:30px;
+	margin-left: 30px;
+}
+
+a[href="génération.html"]
+{
+	font-size:30px;
+	margin-left:30px;
+}
+
+a[href="contact.html"]
+{
+	font-size:30px;
+	margin-left: 30px;
+}
+
+a[href="copyright.html"]
+{
+	font-size:30px;
+	margin-left: 30px;
+}
+
+
+select
+{
+	font-size: 40px;
+	margin-left: 650px;
+	margin-top: 325px;
+}
+
+button
+{
+	font-size:40px;
+	margin-left: 650px;
+}

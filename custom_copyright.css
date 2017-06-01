@@ -1,0 +1,53 @@
+body
+{
+	background : url(fond_copyrigth.png);
+	background-size: cover;
+}
+
+a[href="accueil.html"]
+{
+	font-size:30px;
+	margin-left: 540px;
+}
+
+a[href="conception.html"]
+{
+	font-size:30px;
+	margin-left: 30px;
+}
+
+a[href="opensource.html"]
+{
+	font-size:30px;
+	margin-left: 30px;
+}
+
+a[href="génération.html"]
+{
+	font-size:30px;
+	margin-left:30px;
+}
+
+a[href="contact.html"]
+{
+	font-size:30px;
+	margin-left: 30px;
+}
+
+a[href="copyright.html"]
+{
+	font-size:30px;
+	margin-left: 30px;
+}
+
+div[id="first"]
+{
+	margin-top: 125px;
+}
+
+div
+{
+	font-size:26px;
+	margin-left: 375px;
+	margin-top: 55px;
+}

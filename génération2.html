@@ -1,0 +1,599 @@
+		<!DOCTYPE html>
+		<html>
+				<head>
+				<meta charset="utf-8">
+				<title>Génération d'un Labyrinthe</title>
+				<link rel="stylesheet" href="custom_generation.css">
+
+				<script type="text/javascript">
+					var TAILLE=5;
+
+					function initialisation()
+					{
+						var laby=new Array();
+						laby.length=TAILLE;
+						for (var i=0;i<TAILLE;i++)
+						{
+							laby[i]=new Array();
+							for (var j=0;j<TAILLE;j++)
+							{
+								if (i%2==1 || j%2==1)
+								{
+									laby[i][j]=1;
+								}
+								else
+								{
+									laby[i][j]=0;
+								}
+							}
+						}
+						return laby;
+					}
+
+					function nb_case_vide(matrix)
+					{
+						var compteur=0;
+						for (var i=0;i<TAILLE;i++)
+						{
+							for (var j=0;j<TAILLE;j++)
+							{
+								if (matrix[i][j]==0)
+								{
+									compteur++;
+								}	
+							}
+						}
+						return compteur;
+					}
+
+					function case_dispo(matrix,x,y)
+					{
+						var test=false;
+						if (matrix[x][y]==0)
+						{
+							test=true
+						}
+						return test;
+					}
+
+					function case_existante(matrix,x,y)
+					{
+						var test = true;
+						if (x>TAILLE-1 || y>TAILLE-1 || x<0 || y<0)
+						{
+							test = false;
+						}
+						return test
+					}
+
+					function chemin_possible(matrix,x,y)//renvoie un 4uplet de la forme (haut,bas,gauche,droite) 1=on peut y aller et sinon 0
+					{
+						var tableau_possibilite=new Array();
+						tableau_possibilite.length=4;
+						for (var i=0;i<4;i++)
+						{
+							tableau_possibilite[i]=1;
+						}
+
+
+						if (case_existante(matrix,x-2,y)==false || case_dispo(matrix,x-2,y)==false)
+						{
+							tableau_possibilite[0]=0;
+						}
+						if (case_existante(matrix,x+2,y)==false || case_dispo(matrix,x+2,y)==false)
+						{
+							tableau_possibilite[1]=0;
+						}
+						if (case_existante(matrix,x,y-2)==false || case_dispo(matrix,x,y-2)==false)
+						{
+							tableau_possibilite[2]=0;
+						}
+						if (case_existante(matrix,x,y+2)==false || case_dispo(matrix,x,y+2)==false)
+						{
+							tableau_possibilite[3]=0;
+						}
+						return tableau_possibilite;
+					}
+
+					function avancer(matrix, x, y, dx, dy)//dx ou d = +-2 et l autre vaut 0
+					{
+						matrix[x+dx][y+dy]=2;
+
+						if (dx==0)
+						{
+							if (dy>0)
+							{
+								matrix[x][y+dy-1]=2;
+							}
+								else
+							{
+								matrix[x][y+dy+1]=2;
+							}
+						}
+						else
+						{
+							if (dx>0)
+							{
+								matrix[x+dx-1][y]=2;
+							}
+							else
+							{
+								matrix[x+dx+1][y]=2;
+							}
+						}
+						return matrix;
+					}
+
+					function nb_possibilite(tableau_possibilite)
+					{
+						var somme=0;
+						for (var i=0;i<4;i++)
+						{
+							somme=somme+tableau_possibilite[i];
+						}
+						return somme;
+					}
+
+					function position_un(tableau_possibilite,k)//renvoie la position du kieme 1 dans le tableau des possibilitées
+					{
+						for(var i=0;i<4;i++)
+						{
+							if (tableau_possibilite[i]==1)
+							{
+								k--;
+							}
+							if (k==0)
+							{
+								return i;
+							}
+						}
+					}
+
+					function entier_aleatoire(min, max) 
+					{	
+						min = Math.ceil(min);
+						max = Math.floor(max);
+						return Math.floor(Math.random() * (max - min +1)) + min;
+					}
+
+					function chemin_choisi(tableau_possibilite)//on ne prend pas le cas ou le nombre de chemin choisi est nul
+					{
+						var n=nb_possibilite(tableau_possibilite);
+						var k=entier_aleatoire(1,n);
+						var res=position_un(tableau_possibilite,k);
+						return res;//on retourne l entier qui correspond à l indice du chemin choisis dans le tableau des possibilité de la forme (haut,bas;gauche,droite)
+					}
+
+
+					function calcul_dx(c)
+					{
+						var res=0
+						if (c==0)
+						{
+							res=-2;
+						}
+						if (c==1)
+						{
+							res=2;
+						}
+						return res;
+					}
+
+					function calcul_dy(c)
+					{
+						var res=0
+						if (c==2)
+						{
+							res=-2;
+						}
+						if (c==3)
+						{
+							res=2;
+						}
+						return res;
+					}
+
+
+					function tour_bis(doublet)// de la forme [matrix,position] avec position=[position_actuelle,ancienne_position] (c est 2 tableaux de 2 entiers)
+					{
+						var matrix=doublet[0];
+						var position=doublet[1];
+
+						var nouveau_doublet=new Array();
+						nouveau_doublet.length=2;
+
+						var new_matrix;
+
+						var nouvelle_position=new Array();
+						nouvelle_position.length=2;
+						nouvelle_position[0]=new Array();
+						nouvelle_position[0].length=2;
+						nouvelle_position[1]=new Array();
+						nouvelle_position[1].length=2;
+
+						tableau_possibilite=chemin_possible(matrix,position[0][0],position[0][1]);
+
+
+						if (nb_possibilite(tableau_possibilite)==0)
+						{
+							new_matrix=matrix;
+
+							nouvelle_position[0]=position[1];
+							nouvelle_position[1]=position[1];
+						}
+						else
+						{	
+							var c=chemin_choisi(tableau_possibilite);
+							var dx=calcul_dx(c);
+							var dy=calcul_dy(c);
+
+							if (nb_possibilite(tableau_possibilite)==1)
+							{
+
+								new_matrix=avancer(matrix,position[0][0],position[0][1],dx,dy);
+
+								nouvelle_position[0][0]=position[0][0]+dx;
+								nouvelle_position[0][1]=position[0][1]+dy;
+
+								nouvelle_position[1]=position[1];
+							}
+							else
+							{
+
+								new_matrix=avancer(matrix,position[0][0],position[0][1],dx,dy);
+
+								nouvelle_position[0][0]=position[0][0]+dx;
+								nouvelle_position[0][1]=position[0][1]+dy;
+
+								nouvelle_position[1]=position[0];
+							}
+						}
+
+						nouveau_doublet[0]=new_matrix;
+						nouveau_doublet[1]=nouvelle_position;
+
+						return nouveau_doublet;	
+					}
+
+					function creation(doublet_initial)
+					{
+						var n=nb_case_vide(doublet_initial[0]);
+						while(n>0)
+						{
+							doublet_initial=tour_bis(doublet_initial);
+							n=nb_case_vide(doublet_initial[0]);
+						}
+						return doublet_initial;
+					}
+
+					function labyrinthe()
+					{
+						var init=initialisation();
+						init[0][0]=2;
+						var doublet=[init,[[0,0],[0,0]]];
+						var laby=creation(doublet);
+
+						return laby[0];
+					}
+
+
+					function nb_case_vide_autour(matrix,i,j)
+					{
+						var compteur=0;
+						if (case_existante(matrix,i-1,j)==true)//case au dessus
+						{
+							if (matrix[i-1][j]==2)
+							{
+								compteur++;
+							}
+						}
+						if (case_existante(matrix,i+1,j)==true)//case en dessous
+						{
+							if (matrix[i+1][j]==2)
+							{
+								compteur++;
+							}
+						}
+						if (case_existante(matrix,i,j-1)==true)//gauche
+						{
+							if (matrix[i][j-1]==2)
+							{
+								compteur++;
+							}
+						}
+						if (case_existante(matrix,i,j+1)==true)//droite
+						{
+							if (matrix[i][j+1]==2)
+							{
+								compteur++;
+							}
+						}
+						return compteur;
+					}
+
+					function compte_embranchement(matrix)//à revoir si on compte au milieu ca compte 2 embranchements
+					{
+						var compteur=0;
+						for (var i=0;i<TAILLE;i++)
+						{
+							for (var j=0;j<TAILLE;j++)
+							{
+								if (matrix[i][j]==2)
+								{
+									if (nb_case_vide_autour(matrix,i,j)==3)
+									{
+										compteur++;
+									}
+								}
+							}
+						}
+						if (compteur>1)
+						{
+							var x=compteur%2;
+							compteur=(compteur-x)/2;
+							return compteur;
+						}
+						else
+						{
+							return compteur
+						}
+					}
+
+
+					function mur_aleatoire(matrix, taille)//renvoie un couple (i,j) où matrix[i,j] est un mur
+					{
+						res=new Array();
+						res.length=2;
+						var i=entier_aleatoire(0,taille-1);
+						var j=entier_aleatoire(0,taille-1);
+						while (matrix[i][j]!=1)
+						{
+							var i=entier_aleatoire(0,taille-1);
+							var j=entier_aleatoire(0,taille-1);
+						}
+						res[0]=i;
+						res[1]=j;
+						return res;
+					}
+
+					function case_autour_verticale_mur(matrix,i,j)
+					{
+						var res=false;
+						if (case_existante(matrix,i+1,j) && case_existante(matrix,i-1,j) && matrix[i+1][j]==1 && matrix[i-1][j]==1)
+						{
+							res=true;
+						}
+						return res;
+					}
+
+					function case_autour_verticale_libre(matrix,i,j)
+					{
+						var res=false;
+						if (case_existante(matrix,i+1,j) && case_existante(matrix,i-1,j) && matrix[i+1][j]==2 && matrix[i-1][j]==2)
+						{
+							res=true;
+						}
+						return res;
+					}
+
+
+					function case_autour_horizontale_mur(matrix,i,j)
+					{
+						var res=false;
+						if (case_existante(matrix,i,j-1) && case_existante(matrix,i,j+1) && matrix[i][j-1]==1 && matrix[i][j+1]==1)
+						{
+							res=true;
+						}
+						return res;
+					}
+
+					function case_autour_horizontale_libre(matrix,i,j)
+					{
+						var res=false;
+						if (case_existante(matrix,i,j-1) && case_existante(matrix,i,j+1) && matrix[i][j-1]==2 && matrix[i][j+1]==2)
+						{
+							res=true;
+						}
+						return res;
+					}
+
+					function transformation_possible(matrix,i,j)
+					{
+						var res=false;
+						if ((case_autour_horizontale_mur(matrix,i,j) && case_autour_verticale_libre(matrix,i,j)) ^ (case_autour_horizontale_libre(matrix,i,j) && case_autour_verticale_mur(matrix,i,j)))//le ^ c est le ou exclusif
+						{
+							res=true;
+						}
+						return res;
+					}
+
+
+					function suppression_mur(matrix)
+					{
+						pos_mur=mur_aleatoire(matrix,TAILLE);
+						while (transformation_possible(matrix,pos_mur[0],pos_mur[1])==false)
+						{
+							pos_mur=mur_aleatoire(matrix,TAILLE);
+						}
+						matrix[pos_mur[0]][pos_mur[1]]=2;
+						return matrix;
+					}
+
+					function labyrinthe_a_niveau(niveau)//revoir ce qu est un embranchement sinon on les compte par 2.......
+					{
+						var laby=labyrinthe();
+						var compteur=compte_embranchement(laby);
+						if (compteur>niveau)
+						{
+							return labyrinthe_a_niveau(niveau);
+						}
+						else
+						{
+							if (compteur==niveau)
+							{
+								return laby;
+							}
+							else
+							{
+								while(compteur!=niveau)
+								{
+									suppression_mur(laby);
+									compteur++;
+								}
+								return laby;
+							}
+						}
+					}
+
+					function labyrinthe_final(niveau)//revoir cette fonction ca bug pas mal je sais pas pourquoi
+					{
+						var chemin=labyrinthe_a_niveau(niveau);
+						var laby=new Array();
+						laby.length=TAILLE+2;
+						for (var i=0;i<TAILLE+2;i++)
+						{
+							laby[i]=new Array();
+							for (var j=0;j<TAILLE+2;j++)
+							{
+								laby[i][j]=1;
+							}
+						}
+						for (var i=0;i<TAILLE;i++)
+						{
+							for (var j=0;j<TAILLE;j++)
+							{
+								if (chemin[i][j]==2)
+								{
+									laby[i+1][j+1]=0;
+								}
+							}
+						}
+						laby[1][0]=3;
+						laby[TAILLE][TAILLE+1]=3;
+						return laby;
+					}
+
+					function generate()
+					{
+						var lvl=document.getElementById("choix_du_niveau").value;
+						var x=parseFloat(lvl);
+						var laby=labyrinthe_final(x);
+						alert(laby);
+					}
+					/*function case_color(resultat_generation, position)
+					{
+						var couleur;
+						for (var i=0;i<position; i++)
+						{
+							if (resultat_generation[position]==0) //case vide 
+							{
+								couleur="white";
+							}
+							else{
+								if (resultat_generation[posittion]==1) //mur
+								{
+									couleur="yellow";
+								}
+								else //case départ
+								{
+									couleur="green"; 
+								}
+							}
+						}
+						return couleur;
+					}
+					/*function casecolor(resultat_generation, position)
+					{
+						var arrayLignes = document.getElementById("monTableau").rows; //on récupère les lignes du tableau
+						var longueur = arrayLignes.length;//on peut donc appliquer la propriété length
+						for(var i=0; i<longueur; i++)//on peut directement définir la variable i dans la boucle
+
+						{
+
+						    var arrayColonnes = arrayLignes[i].cells;//on récupère les cellules de la ligne
+						    var largeur = arrayColonnes.length;
+
+						    for(var j=0; j<largeur; j++)
+						    {
+						    	var arrayCellq = arrayLignes[j].cells[i]
+						    	if (resultat_generation[position]==0) //case vie
+						    	{
+						       		arrayColonnes[j].style.backgroundColor = "#bdcbf5";
+						    	}
+						    	else{
+						    		if (resultat_generation[position]==1) // mur
+						    		{
+						    			arrayColonnes[j].style.backgroundColor = "#bdcbf5";
+						    		}
+						    		else{  //case départ
+						    			arrayColonnes[j].style.backgroundColor = "#bdcbf5";
+						    		}
+						    	}
+					    	}
+					    }
+
+					}*/
+
+					function colorer()
+					{
+						var table = document.getElementById("maTable"); 
+						var cellules = table.getElementsByTagName("td"); 
+						for (var i = 0; i < cellules.length; i++) 
+						{ 
+						    if ( cellules[i].html() == 0) //case vide
+						    { 
+						        cellules[i].style.backgroundColor = "white";
+						    } 
+						    else 
+						    {
+						    	if (cellules[i].html() == 1) //mur
+						    	{
+						    		cellules[i].style.backgroundColor = "yellow";
+						    	}
+						    	else
+						    	{	
+						    		cellules[i].style.backgroundColor = "green";
+						    	}
+						    }
+						}
+					}
+
+
+
+
+				</script>
+			</head>
+
+
+			<body>
+				<a href="accueil.html">Accueil</a>
+				<a href="conception.html">Conception</a>
+				<a href="opensource.html">Open-Source</a>
+				<a href="génération.html">Génération</a>
+				<a href="contact.html">Contact</a>
+				<a href="copyright.html">Copyright</a>
+
+				<select id="choix_du_niveau">
+					<option value="1">Niveau 1</option>
+					<option value="2">Niveau 2</option>
+					<option value="3">Niveau 3</option>
+				</select>
+
+				<br><br><br><br><br>
+				<button id="generation" onclick="generate()">Générer !</button>
+				<br><br><br>
+
+				<!--<table>
+					<tr>
+						<td bgcolor=case_color(resultat_generation[1])></td>
+						<td bgcolor=case_color(resultat_generation[2])></td>
+						<td bgcolor=case_color(resultat_generation[3])></td>
+						<td bgcolor=case_color(resultat_generation[4])></td>
+						<td bgcolor=case_color(resultat_generation[5])></td>
+						<td bgcolor=case_color(resultat_generation[6])></td>
+						<td bgcolor=case_color(resultat_generation[7])></td>
+					</tr>
+				</table>-->
+
+			</body>
+		</html>
