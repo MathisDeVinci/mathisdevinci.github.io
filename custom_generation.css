@@ -50,8 +50,8 @@ select
 
 button
 {
-	/*font-size:40px;
-	margin-left: 650px;*/
-	margin-left: auto;
-	margin-right: auto;
+	font-size:40px;
+	/*margin-left: 650px;*/
+	left: 50%;
+	
 }
